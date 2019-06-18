@@ -1,4 +1,5 @@
-[download]: https://github.com/FlashyReese/AppIPSwitch/releases/latest
+[Download Latest](https://github.com/FlashyReese/AppIPSwitch/releases/latest)
+
 
 # AppIPSwitch
 Forces an application to use a specific network. AppIPSwitch uses [ForceBindIP](https://r1ch.net/projects/forcebindip "ForceBindIP") to do the binding.
