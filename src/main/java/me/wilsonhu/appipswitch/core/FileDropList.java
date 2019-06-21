@@ -71,8 +71,6 @@ public class FileDropList extends JPanel implements DropTargetListener {
     
     public void setBounds(int x, int y, int x2, int y2) {
     	super.setBounds(x, y, x2, y2);
-    	//jScrollPane1.setBounds(this.getBounds());
-        
     }
     
     public void setSize(int x, int y) {
@@ -127,6 +125,7 @@ public class FileDropList extends JPanel implements DropTargetListener {
     					}
                 	}
                 }
+                AppIPSwitch.getInstance().getJsonManager().writeProfilesJson();
             }
         } catch (UnsupportedFlavorException e) {
             e.printStackTrace();

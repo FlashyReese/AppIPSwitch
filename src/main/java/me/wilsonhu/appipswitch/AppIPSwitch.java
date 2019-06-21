@@ -14,11 +14,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -52,11 +48,9 @@ public class AppIPSwitch extends JFrame{
 	private static AppIPSwitch instance;
 	private JsonManager jsonManager;
 	private Settings settings;
-	
 	private ProfileManager profileManager;
 	private Functions functions;
 	private Profile profile;
-	
 	
 	//ForceBindIP Panel
 	URI FORCE_BIND_IP_URL;
@@ -67,11 +61,11 @@ public class AppIPSwitch extends JFrame{
 	private JLabel txtForceBindIP;
 	private JLabel txtcurrentDir;
 	private JLabel txtForceBindIPVersion;
+	
 	//Profile
 	public FileDropList profileDropList = new FileDropList();
 	private JTextField txtName;
 	private JLabel lbltxtName;
-	
 	
 	//NIC Panel
 	private JPanel nidPanel;
@@ -102,12 +96,55 @@ public class AppIPSwitch extends JFrame{
 		setTitle("AppIPSwitch");
 	    setLayout(null);
 		setResizable(false);
-	    //this.setLocationRelativeTo(null);
-		this.setSize(880, 700);
-	    //pack();
+		/*
+		 * Weird UI Bug when using JavaSE 11, this was built on JavaSE 1.8 setSize(880, 700)
+		 * Probably should make this resizable 
+		 */
+		this.setSize(900, 700);
 		initComponents();
 	}
-
+	
+	public static void main(String[] args) {
+		/*try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Metal".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
+		 try {
+			 // set look and feel to system dependent
+			 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		 } catch (Exception ex) {
+			 ex.printStackTrace();
+		 }
+		EventQueue.invokeLater(new Runnable() {
+            public void run() {
+            	getInstance().setVisible(true);
+            	try {
+					getInstance().onReady();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+            }
+        });
+	}
+	
+	public void onReady() throws Exception {
+    	getInstance().getJsonManager().loadAllJsonSettings();
+    	getInstance().refreshFoundLabel();
+    	checkItemSelected();
+	}
+	
 	private void preStart() throws URISyntaxException {
 		this.FORCE_BIND_IP_URL = new URI("https://r1ch.net/projects/forcebindip");
 	}
@@ -177,7 +214,6 @@ public class AppIPSwitch extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
             	updateProfileFromOptions();
-            	//System.out.println(profileDropList.getSelectedValue().getName() + " - x64 " + profileDropList.getSelectedValue().isX64());
             }
         });
 		
@@ -188,7 +224,6 @@ public class AppIPSwitch extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
             	updateProfileFromOptions();
-            	//System.out.println(profileDropList.getSelectedValue().getName() + " - useI " + profileDropList.getSelectedValue().isUseI());
             }
         });
 		
@@ -204,7 +239,6 @@ public class AppIPSwitch extends JFrame{
             		txtCMDOptions.setEnabled(false);
             	}
             	updateProfileFromOptions();
-            	//System.out.println(profileDropList.getSelectedValue().getName() + " - useCMD " + profileDropList.getSelectedValue().getCmdOptions());
             }
         });
 		
@@ -260,7 +294,11 @@ public class AppIPSwitch extends JFrame{
 				 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 					 String path = chooser.getSelectedFile().getAbsolutePath();
 					 getFunctions().changeDir(path);
-					 refreshFoundLabel();
+					 try {
+						refreshFoundLabel();
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
 					 checkItemSelected();
 				 }  
 			}
@@ -293,12 +331,10 @@ public class AppIPSwitch extends JFrame{
 		profileDropList.getList().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
-				//if(profileDropList.getSelectedValue() != null && profile != profileDropList.getSelectedValue()) {
-				profile = null;
+				//profile = null;
 				profile = profileDropList.getSelectedValue();
 				checkItemSelected();
 				if(isItemSelected())updateOptionsFromProfile();
-				//}
 			}
 		});
 		profileDropList.getList().addMouseListener(new PopClickListener());
@@ -315,12 +351,6 @@ public class AppIPSwitch extends JFrame{
 	            	requestFocusInWindow();
 	            }
 	         }
-	         /*public void keyTyped(KeyEvent e) {
-				  char c = e.getKeyChar();
-				  if (c == '/' || c == '\'' || c == ':' || c == '*' || c == '?' || c == '"' || c == '<' || c == '>' || c == '|') {
-				     e.consume();
-				  }
-	         }*/
 		});
 		
 		lbltxtName = new JLabel("Name: ");
@@ -341,7 +371,6 @@ public class AppIPSwitch extends JFrame{
 			}
 		});
 		
-		
 		//Panel Positioning
 		nidPanel.setLocation(370, 82);
 		nidPanel.setSize(500, 100);
@@ -354,8 +383,7 @@ public class AppIPSwitch extends JFrame{
 		nidPanel.setBorder(new LineBorder(Color.DARK_GRAY));
 		settingsPanel.setBorder(new LineBorder(Color.DARK_GRAY));
 		fbPanel.setBorder(new LineBorder(Color.DARK_GRAY));
-		
-		
+			
 		this.add(settingsPanel);
 		this.add(profileDropList);
 		this.add(nidPanel);
@@ -367,8 +395,6 @@ public class AppIPSwitch extends JFrame{
 	}
 	
 	public void updateOptionsFromProfile() {
-		//System.out.println("CurrentProfile " + profile.getName());
-		//System.out.println(String.format("CMD: %s x64: %s useI: %s NID: %s File: %s", profile.getCmdOptions(), profile.isX64(), profile.isUseI(), profile.getNID(), profile.getExecutable()));
 		txtName.setText(profile.getName());
 		x64.setSelected(profile.isX64());
 		useI.setSelected(profile.isUseI());
@@ -422,65 +448,10 @@ public class AppIPSwitch extends JFrame{
     	if(profileDropList.getSelectedValue() != null)profileDropList.getSelectedValue().setNID(macAddress);
 	}
 	
-	public ProfileManager getProfileManager() {
-		if(profileManager == null)profileManager = new ProfileManager();
-		return profileManager;
-	}
-	
-	public JsonManager getJsonManager() {
-		if(jsonManager == null) jsonManager = new JsonManager();
-		return jsonManager;
-	}
-	
-	public Functions getFunctions() {
-		if(functions == null) functions = new Functions();
-		return functions;
-	}
-	
-	public static AppIPSwitch getInstance() {
-		if(instance == null) instance = new AppIPSwitch();
-		return instance;
-	}
-	
-	public Settings getSettings() {
-		if(settings == null)settings = new Settings();
-		return settings;
-	}
-	
-	public void setSettings(Settings s) {
-		this.settings = s;
-	}
-	
-	public static void main(String[] args) {
-		try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Metal".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
-        }
-		EventQueue.invokeLater(new Runnable() {
-            public void run() {
-            	getInstance().setVisible(true);
-            	getInstance().onReady();
-            }
-        });
-	}
-	
 	public void refreshNetworkInterfaces() {
 		networkDevices.removeAllItems();
 		try {
 			for(NetworkInterface nid: Collections.list(NetworkInterface.getNetworkInterfaces())) {
-				
 				if(nid.getInetAddresses().hasMoreElements() && nid.getInetAddresses().nextElement().getHostAddress().contains(".")) {
 					networkDevices.addItem(nid);
 				}
@@ -511,24 +482,13 @@ public class AppIPSwitch extends JFrame{
 			  networkDevices.setSelectedItem(item);
 		  }
 		}
-		
 	}
-	public String readFileAsString(String fileName)throws Exception 
-	  { 
-	    String data = ""; 
-	    data = new String(Files.readAllBytes(Paths.get(fileName))); 
-	    return data; 
-	  } 
 	
-	public void refreshFoundLabel(){
+	public void refreshFoundLabel() throws Exception{
 		if(this.getFunctions().isProgramFound()){
 			txtisFound.setText("Found");
 			txtisFound.setForeground(Color.GREEN);
-			try {
-				txtForceBindIPVersion.setText("Version: " + readFileAsString(getSettings().getForceBindDir() + File.separator + getSettings().getForceBindVersionFile()));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			txtForceBindIPVersion.setText("Version: " + getFunctions().readFileAsString(getSettings().getForceBindDir() + File.separator + getSettings().getForceBindVersionFile()));
 		}else{
 			txtisFound.setText("Not Found");
 			txtisFound.setForeground(Color.RED);
@@ -537,13 +497,6 @@ public class AppIPSwitch extends JFrame{
 		
 		txtcurrentDir.setText("Directory: " + getSettings().getForceBindDir());
 		txtcurrentDir.setToolTipText(getSettings().getForceBindDir());
-	}
-	
-	public boolean isItemSelected() {
-		if(profileDropList.getSelectedValue() == null) {
-			return false;
-		}
-		return true;
 	}
 	
 	public void checkItemSelected() {
@@ -565,9 +518,39 @@ public class AppIPSwitch extends JFrame{
 		}
 	}
 	
-	public void onReady() {
-    	getInstance().getJsonManager().loadAllJsonSettings();
-    	getInstance().refreshFoundLabel();
-    	checkItemSelected();
+	public void setSettings(Settings s) {
+		this.settings = s;
+	}
+	
+	public ProfileManager getProfileManager() {
+		if(profileManager == null)profileManager = new ProfileManager();
+		return profileManager;
+	}
+	
+	public JsonManager getJsonManager() {
+		if(jsonManager == null) jsonManager = new JsonManager();
+		return jsonManager;
+	}
+	
+	public Functions getFunctions() {
+		if(functions == null) functions = new Functions();
+		return functions;
+	}
+	
+	public static AppIPSwitch getInstance() {
+		if(instance == null) instance = new AppIPSwitch();
+		return instance;
+	}
+	
+	public Settings getSettings() {
+		if(settings == null)settings = new Settings();
+		return settings;
+	}
+	
+	public boolean isItemSelected() {
+		if(profileDropList.getSelectedValue() == null) {
+			return false;
+		}
+		return true;
 	}
 }
