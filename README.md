@@ -20,7 +20,7 @@ Forces an application to use a specific network. AppIPSwitch uses [ForceBindIP](
 
 ### Future Plans
 * Import all installed applications
-* AutoUpdater
+* ~~AutoUpdater~~
 
 ### Libraries
 * [ForceBindIP](https://r1ch.net/projects/forcebindip "ForceBindIP") by [R1CH](https://twitter.com/R1CH_TL "Richard Stanway Twitter")
