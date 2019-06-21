@@ -13,16 +13,22 @@ import me.wilsonhu.appipswitch.AppIPSwitch;
 
 public class JsonManager {
 	
+	private AppIPSwitch gui;
+	
+	public JsonManager(AppIPSwitch main) {
+		this.gui = main;
+	}
+	
 	public void loadAllJsonSettings() {
 		readProfilesJson();
-    	AppIPSwitch.getInstance().profileDropList.loadSettings();
+		gui.profileDropList.loadSettings();
     	readSettingsJson();
 	}
 	
 	public void writeProfilesJson() {
         try {
             Gson gson = new Gson();
-            String json = gson.toJson(AppIPSwitch.getInstance().getProfileManager().getProfiles());
+            String json = gson.toJson(gui.getProfileManager().getProfiles());
             FileWriter fw = new FileWriter("profiles.json");
             fw.write(json);
             fw.flush();
@@ -36,7 +42,7 @@ public class JsonManager {
             FileReader fileReader = new FileReader("profiles.json");
             BufferedReader buffered = new BufferedReader(fileReader);
             Type type = new TypeToken<ArrayList<Profile>>(){}.getType();
-            AppIPSwitch.getInstance().getProfileManager().setProfile(gson.fromJson(fileReader, type));
+            gui.getProfileManager().setProfile(gson.fromJson(fileReader, type));
             buffered.close();
             fileReader.close();
         } catch (Exception ex) {
@@ -47,7 +53,7 @@ public class JsonManager {
 	public void writeSettingsJson() {
         try {
             Gson gson = new Gson();
-            String json = gson.toJson(AppIPSwitch.getInstance().getSettings());
+            String json = gson.toJson(gui.getSettings());
             FileWriter fw = new FileWriter("settings.json");
             fw.write(json);
             fw.flush();
@@ -61,7 +67,7 @@ public class JsonManager {
             FileReader fileReader = new FileReader("settings.json");
             BufferedReader buffered = new BufferedReader(fileReader);
             Type type = new TypeToken<Settings>(){}.getType();
-            AppIPSwitch.getInstance().setSettings(gson.fromJson(fileReader, type));
+            gui.setSettings(gson.fromJson(fileReader, type));
             buffered.close();
             fileReader.close();
         } catch (Exception ex) {

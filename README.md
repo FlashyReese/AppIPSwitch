@@ -2,10 +2,16 @@
 
 
 # AppIPSwitch
-Forces an application to use a specific network. AppIPSwitch uses [ForceBindIP](https://r1ch.net/projects/forcebindip "ForceBindIP") to do the binding.
+Forces an application to use a specific network. AppIPSwitch uses [ForceBindIP](https://r1ch.net/projects/forcebindip "ForceBindIP") to do the binding. This application is built on Java 8/1.8
 
 [![forthebadge](https://forthebadge.com/images/badges/fuck-it-ship-it.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/gluten-free.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://forthebadge.com)
 ### Features
+**v1.1**
+* UI Clean up
+* AutoUpdater
+* Settings - Added Location of Executable
+* MenuBar - Check of Updates
+
 **v1.0**
 * Drag and Drop Applications(Only Supports .exe and .lnk)
 * Select Network Devices from ComboBox

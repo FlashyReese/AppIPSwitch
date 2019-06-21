@@ -11,10 +11,8 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -22,21 +20,25 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import me.wilsonhu.appipswitch.config.JsonManager;
 import me.wilsonhu.appipswitch.config.Profile;
 import me.wilsonhu.appipswitch.config.ProfileManager;
 import me.wilsonhu.appipswitch.config.Settings;
-import me.wilsonhu.appipswitch.core.ComboBoxRenderer;
-import me.wilsonhu.appipswitch.core.FileDropList;
 import me.wilsonhu.appipswitch.core.Functions;
-import me.wilsonhu.appipswitch.core.PopClickListener;
+import me.wilsonhu.appipswitch.swing.ComboBoxRenderer;
+import me.wilsonhu.appipswitch.swing.FileDropList;
+import me.wilsonhu.appipswitch.swing.PopClickListener;
 
 public class AppIPSwitch extends JFrame{
 
@@ -50,40 +52,47 @@ public class AppIPSwitch extends JFrame{
 	private Settings settings;
 	private ProfileManager profileManager;
 	private Functions functions;
-	private Profile profile;
+	public Profile profile;
+	
+	
+	private JMenuBar jMenuBar;
+	private JMenu jMenuHelp;
 	
 	//ForceBindIP Panel
-	URI FORCE_BIND_IP_URL;
-	private JPanel fbPanel;
-	private JButton changeDir;
-	private JButton download;
-	private JLabel txtisFound;
-	private JLabel txtForceBindIP;
-	private JLabel txtcurrentDir;
-	private JLabel txtForceBindIPVersion;
+	public URI FORCE_BIND_IP_URL;
+	public JPanel fbPanel;
+	public JButton changeDir;
+	public JButton download;
+	public JLabel txtisFound;
+	public JLabel txtForceBindIP;
+	public JLabel txtcurrentDir;
+	public JLabel txtForceBindIPVersion;
 	
 	//Profile
-	public FileDropList profileDropList = new FileDropList();
-	private JTextField txtName;
-	private JLabel lbltxtName;
+	public FileDropList profileDropList = new FileDropList(this);
+	public JTextField txtName;
+	public JLabel lbltxtName;
 	
 	//NIC Panel
-	private JPanel nidPanel;
-	private JButton refreshNID;
-	private JLabel nidName;
-	private JLabel nidAddress;
-	private JLabel nidType;
-	private JLabel nidMACAddress;
-	private JComboBox<NetworkInterface> networkDevices;
+	public JPanel nidPanel;
+	public JButton refreshNID;
+	public JLabel nidName;
+	public JLabel nidAddress;
+	public JLabel nidType;
+	public JLabel nidMACAddress;
+	public JComboBox<NetworkInterface> networkDevices;
 	
 	//Settings Panel
-	private JPanel settingsPanel;
-	private JLabel txtSettings;
-	private JButton run;
-	private JCheckBox x64;
-	private JCheckBox useI;
-	private JCheckBox useCMDOptions;
-	private JTextField txtCMDOptions;
+	public JPanel settingsPanel;
+	public JLabel txtSettings;
+	public JButton run;
+	public JCheckBox x64;
+	public JCheckBox useI;
+	public JCheckBox useCMDOptions;
+	public JTextField txtCMDOptions;
+	public JTextField txtExeDirectory;
+	public JButton changeExeDir;
+	
 	
 	public AppIPSwitch() {
 		try {
@@ -100,27 +109,11 @@ public class AppIPSwitch extends JFrame{
 		 * Weird UI Bug when using JavaSE 11, this was built on JavaSE 1.8 setSize(880, 700)
 		 * Probably should make this resizable 
 		 */
-		this.setSize(900, 700);
+		this.setSize(884, 490);
 		initComponents();
 	}
 	
 	public static void main(String[] args) {
-		/*try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Metal".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            Logger.getLogger(AppIPSwitch.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
 		 try {
 			 // set look and feel to system dependent
 			 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -140,9 +133,9 @@ public class AppIPSwitch extends JFrame{
 	}
 	
 	public void onReady() throws Exception {
-    	getInstance().getJsonManager().loadAllJsonSettings();
-    	getInstance().refreshFoundLabel();
-    	checkItemSelected();
+		getJsonManager().loadAllJsonSettings();
+    	getFunctions().refreshFoundLabel();
+    	getFunctions().checkItemSelected();
 	}
 	
 	private void preStart() throws URISyntaxException {
@@ -150,34 +143,54 @@ public class AppIPSwitch extends JFrame{
 	}
 
 	private void initComponents() {
+		jMenuBar = new JMenuBar();
+		jMenuHelp = new JMenu();
+		jMenuHelp.setText("Help");
+		JMenuItem checkForUpdates = new JMenuItem();
+		checkForUpdates.setText("Check for Updates");
+		checkForUpdates.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				File file = new File("AppIPSwitchUpdater.jar");
+				try {
+					Desktop.getDesktop().open(file);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				System.exit(0);
+			}
+	    });
+		jMenuHelp.add(checkForUpdates);
+		
+		jMenuBar.add(jMenuHelp);
+		
 		//TODO: Start of NID Panel
 		nidPanel = new JPanel();
 		nidPanel.setLayout(null);
 		nidPanel.setName("Network Interface");
 		nidName = new JLabel("Network Device:");
 		nidName.setFont(new Font("Tahoma", 1, 12));
-		nidName.setBounds(8, 10, 110, 20);
+		nidName.setBounds(6, 6, 110, 20);
 		
 		nidAddress = new JLabel("IPv4 Address: ");
 		nidAddress.setFont(new Font("Tahoma",0, 12));
-		nidAddress.setBounds(28, 30, 300, 20);
+		nidAddress.setBounds(8, 30, 300, 20);
 		
 		nidMACAddress = new JLabel("MAC Address: ");
 		nidMACAddress.setFont(new Font("Tahoma",0, 12));
-		nidMACAddress.setBounds(28, 50, 300, 20);
+		nidMACAddress.setBounds(8, 50, 300, 20);
 		
 		nidType = new JLabel("Network Type: ");
 		nidType.setFont(new Font("Tahoma",0, 12));
-		nidType.setBounds(28, 70, 300, 20);
+		nidType.setBounds(8, 70, 300, 20);
 		
 		networkDevices = new JComboBox<NetworkInterface>();
-		refreshNetworkInterfaces();
+		getFunctions().refreshNetworkInterfaces();
 		ComboBoxRenderer renderer = new ComboBoxRenderer();
 		networkDevices.setRenderer(renderer);
 		networkDevices.addActionListener (new ActionListener () {
 		    public void actionPerformed(ActionEvent e) {
-		    	updateNIDLabels();
-		    	updateProfileFromOptions();
+		    	getFunctions().updateNIDLabels();
+		    	getFunctions().updateProfileFromOptions();
 		    }
 		});
 		networkDevices.setBounds(112, 4, 300, 26);
@@ -186,8 +199,8 @@ public class AppIPSwitch extends JFrame{
 		refreshNID.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {	
-				refreshNetworkInterfaces();
-				updateProfileFromOptions();
+				getFunctions().refreshNetworkInterfaces();
+				getFunctions().updateProfileFromOptions();
 			}
 		});
 		refreshNID.setBounds(414, 4, 80, 26);
@@ -213,7 +226,7 @@ public class AppIPSwitch extends JFrame{
 		x64.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-            	updateProfileFromOptions();
+				getFunctions().updateProfileFromOptions();
             }
         });
 		
@@ -223,7 +236,7 @@ public class AppIPSwitch extends JFrame{
 		useI.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-            	updateProfileFromOptions();
+				getFunctions().updateProfileFromOptions();
             }
         });
 		
@@ -238,7 +251,7 @@ public class AppIPSwitch extends JFrame{
             	}else {
             		txtCMDOptions.setEnabled(false);
             	}
-            	updateProfileFromOptions();
+            	getFunctions().updateProfileFromOptions();
             }
         });
 		
@@ -249,10 +262,46 @@ public class AppIPSwitch extends JFrame{
 		txtCMDOptions.addKeyListener(new KeyAdapter() {
 	         public void keyPressed(KeyEvent e) {
 	            if (e.getKeyCode()==KeyEvent.VK_ENTER) {
-	            	updateProfileFromOptions();
+	            	getFunctions().updateProfileFromOptions();
 	            	requestFocusInWindow();
 	            }
 	         }
+		});
+		
+		txtExeDirectory = new JTextField("");
+		txtExeDirectory.setFont(new Font("Tahoma", 0, 12));
+		txtExeDirectory.setBounds(4, 96, 412, 22);
+		
+		changeExeDir = new JButton("Select");
+		changeExeDir.setBounds(416, 96, 80, 22);
+		changeExeDir.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				UIManager.put("FileChooser.readOnly", Boolean.TRUE); 
+				JFileChooser chooser = new JFileChooser();
+				chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				if(profile != null) {
+					File cDir = new File(profile.getExecutable());
+					chooser.setCurrentDirectory(new File(cDir.getParent()));
+				}else {
+					chooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+				}
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("Executables", "exe");   
+				chooser.setFileFilter(filter);
+				if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+					if(!isItemSelected() && profile == null) {
+						Profile p = new Profile(chooser.getSelectedFile().getName(), "", chooser.getSelectedFile().getAbsolutePath(), false, false);
+						profileDropList.addItem(p);
+						profileDropList.getList().setSelectedIndex(profileDropList.getList().getModel().getSize()-1);
+						getFunctions().checkItemSelected();
+						if(isItemSelected())getFunctions().updateOptionsFromProfile();
+					}
+					String path = chooser.getSelectedFile().getAbsolutePath();
+					txtExeDirectory.setText(path);
+					profile.setExecutable(path);
+				} 
+				getFunctions().updateProfileFromOptions();
+			}
 		});
 		
 		settingsPanel.add(txtSettings);
@@ -260,6 +309,8 @@ public class AppIPSwitch extends JFrame{
 		settingsPanel.add(useI);
 		settingsPanel.add(useCMDOptions);
 		settingsPanel.add(txtCMDOptions);
+		settingsPanel.add(txtExeDirectory);
+		settingsPanel.add(changeExeDir);
 		
 		//End of Settings Panel TODO: Start of ForceBindIP Panel
 		fbPanel = new JPanel();
@@ -295,11 +346,11 @@ public class AppIPSwitch extends JFrame{
 					 String path = chooser.getSelectedFile().getAbsolutePath();
 					 getFunctions().changeDir(path);
 					 try {
-						refreshFoundLabel();
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
-					 checkItemSelected();
+						 getFunctions().refreshFoundLabel();
+					 } catch (Exception e1) {
+						 e1.printStackTrace();
+					 }
+					 getFunctions().checkItemSelected();
 				 }  
 			}
 		});
@@ -333,32 +384,32 @@ public class AppIPSwitch extends JFrame{
 			public void valueChanged(ListSelectionEvent arg0) {
 				//profile = null;
 				profile = profileDropList.getSelectedValue();
-				checkItemSelected();
-				if(isItemSelected())updateOptionsFromProfile();
+				getFunctions().checkItemSelected();
+				if(isItemSelected())getFunctions().updateOptionsFromProfile();
 			}
 		});
-		profileDropList.getList().addMouseListener(new PopClickListener());
-		profileDropList.setSize(350, 610);
-		profileDropList.setLocation(10, 50);
+		profileDropList.getList().addMouseListener(new PopClickListener(this));
+		profileDropList.setSize(350, 402);
+		profileDropList.setLocation(10, 10);
 		
 		txtName = new JTextField();
-		txtName.setBounds(420, 50, 450, 30);
+		txtName.setBounds(420, 10, 450, 30);
 		txtName.setFont(new Font("Tahoma", 0, 18));
 		txtName.addKeyListener(new KeyAdapter() {
 	         public void keyPressed(KeyEvent e) {
 	            if (e.getKeyCode()==KeyEvent.VK_ENTER) {
-	            	updateProfileFromOptions();
+	            	getFunctions().updateProfileFromOptions();
 	            	requestFocusInWindow();
 	            }
 	         }
 		});
 		
 		lbltxtName = new JLabel("Name: ");
-		lbltxtName.setBounds(370, 50, 150, 30);
+		lbltxtName.setBounds(370, 10, 150, 30);
 		
 		run = new JButton("Run");
 		run.setFont(new Font("Verdana", 1, 30));
-		run.setBounds(370, 286, 500, 40);
+		run.setBounds(370, 270, 500, 40);
 		run.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -367,23 +418,24 @@ public class AppIPSwitch extends JFrame{
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-				updateProfileFromOptions();
+				getFunctions().updateProfileFromOptions();
 			}
 		});
 		
 		//Panel Positioning
-		nidPanel.setLocation(370, 82);
+		nidPanel.setLocation(370, 42);
 		nidPanel.setSize(500, 100);
-		settingsPanel.setLocation(370, 184);
-		settingsPanel.setSize(500, 100);
-		fbPanel.setLocation(370, 328);
+		settingsPanel.setLocation(370, 144);
+		settingsPanel.setSize(500, 124);
+		fbPanel.setLocation(370, 312);
 		fbPanel.setSize(500, 100);
 		
 		//Panel Customizing
 		nidPanel.setBorder(new LineBorder(Color.DARK_GRAY));
 		settingsPanel.setBorder(new LineBorder(Color.DARK_GRAY));
 		fbPanel.setBorder(new LineBorder(Color.DARK_GRAY));
-			
+		
+		setJMenuBar(jMenuBar);
 		this.add(settingsPanel);
 		this.add(profileDropList);
 		this.add(nidPanel);
@@ -392,130 +444,6 @@ public class AppIPSwitch extends JFrame{
 		this.add(txtName);
 		this.add(lbltxtName);
 		
-	}
-	
-	public void updateOptionsFromProfile() {
-		txtName.setText(profile.getName());
-		x64.setSelected(profile.isX64());
-		useI.setSelected(profile.isUseI());
-		useCMDOptions.setSelected(profile.isUseCMDOptions());
-		txtCMDOptions.setText(profile.getCmdOptions());
-		loadSavedMACAddress(profile.getNID());
-	}
-	
-	public void updateProfileFromOptions() {
-		if(profileDropList.getSelectedValue() == null)return;
-		if(!txtName.getText().trim().isEmpty()) {
-			profileDropList.getSelectedValue().setName(txtName.getText());
-		}else {
-			txtName.setText(profileDropList.getSelectedValue().getName());
-		}
-		profileDropList.getSelectedValue().setCmdOptions(txtCMDOptions.getText());
-		profileDropList.getSelectedValue().setX64(x64.isSelected());
-		profileDropList.getSelectedValue().setUseI(useI.isSelected());
-		profileDropList.getSelectedValue().setUseCMDOptions(useCMDOptions.isSelected());
-		profileDropList.refresh();
-		this.getProfileManager().getProfiles().clear();
-		for(int i = 0; i < profileDropList.getList().getModel().getSize(); i++){
-		     Profile p = profileDropList.getList().getModel().getElementAt(i);
-		     this.getProfileManager().getProfiles().add(p);
-		}
-		this.getJsonManager().writeProfilesJson();
-	}
-	
-	private void updateNIDLabels() {
-		NetworkInterface currentInterface = (NetworkInterface)networkDevices.getSelectedItem();
-		if(currentInterface == null)return;
-		this.nidAddress.setText("IPv4 Address:     " + currentInterface.getInetAddresses().nextElement().getHostAddress());
-		byte[] mac1 = null;
-		String macAddress = "";
-		try {
-			mac1 = currentInterface.getHardwareAddress();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-        if (mac1 != null) {
-            for (int k = 0; k < mac1.length; k++) {
-                macAddress = macAddress + String.format("%02X%s", mac1[k], (k < mac1.length - 1) ? "-" : "");
-            }
-        }
-        if(macAddress.trim().equals("")) {
-        	this.nidMACAddress.setText("MAC Address:     Not Available");
-        }else {
-        	this.nidMACAddress.setText("MAC Address:     " + macAddress);
-        }
-        this.nidType.setText("Network Type:   " + currentInterface.getName());
-    	if(profileDropList.getSelectedValue() != null)profileDropList.getSelectedValue().setNID(macAddress);
-	}
-	
-	public void refreshNetworkInterfaces() {
-		networkDevices.removeAllItems();
-		try {
-			for(NetworkInterface nid: Collections.list(NetworkInterface.getNetworkInterfaces())) {
-				if(nid.getInetAddresses().hasMoreElements() && nid.getInetAddresses().nextElement().getHostAddress().contains(".")) {
-					networkDevices.addItem(nid);
-				}
-			}
-		} catch (SocketException e2) {
-			e2.printStackTrace();
-		}
-		updateNIDLabels();
-	}
-
-	public void loadSavedMACAddress(String mac) {
-		int size = networkDevices.getItemCount();
-		for (int i = 0; i < size; i++) {
-		  NetworkInterface item = networkDevices.getItemAt(i);
-		  byte[] mac1 = null;
-		  String macAddress = "";
-		  try {
-			  mac1 = item.getHardwareAddress();
-		  } catch (SocketException e) {
-			  e.printStackTrace();
-		  }
-		  if (mac1 != null) {
-			  for (int k = 0; k < mac1.length; k++) {
-				  macAddress = macAddress + String.format("%02X%s", mac1[k], (k < mac1.length - 1) ? "-" : "");
-			  }
-		  }
-		  if(mac.equalsIgnoreCase(macAddress) && !mac.trim().isEmpty()) {
-			  networkDevices.setSelectedItem(item);
-		  }
-		}
-	}
-	
-	public void refreshFoundLabel() throws Exception{
-		if(this.getFunctions().isProgramFound()){
-			txtisFound.setText("Found");
-			txtisFound.setForeground(Color.GREEN);
-			txtForceBindIPVersion.setText("Version: " + getFunctions().readFileAsString(getSettings().getForceBindDir() + File.separator + getSettings().getForceBindVersionFile()));
-		}else{
-			txtisFound.setText("Not Found");
-			txtisFound.setForeground(Color.RED);
-			txtForceBindIPVersion.setText("");
-		}
-		
-		txtcurrentDir.setText("Directory: " + getSettings().getForceBindDir());
-		txtcurrentDir.setToolTipText(getSettings().getForceBindDir());
-	}
-	
-	public void checkItemSelected() {
-		if(isItemSelected() && getFunctions().isProgramFound()) {
-			run.setEnabled(true);
-			txtName.setEnabled(true);
-			networkDevices.setEnabled(true);
-			x64.setEnabled(true);
-			useI.setEnabled(true);
-			useCMDOptions.setEnabled(true);
-		}else {
-			run.setEnabled(false);
-			txtName.setEnabled(false);
-			networkDevices.setEnabled(false);
-			x64.setEnabled(false);
-			useI.setEnabled(false);
-			useCMDOptions.setEnabled(false);
-			txtCMDOptions.setEnabled(false);
-		}
 	}
 	
 	public void setSettings(Settings s) {
@@ -528,12 +456,12 @@ public class AppIPSwitch extends JFrame{
 	}
 	
 	public JsonManager getJsonManager() {
-		if(jsonManager == null) jsonManager = new JsonManager();
+		if(jsonManager == null) jsonManager = new JsonManager(this);
 		return jsonManager;
 	}
 	
 	public Functions getFunctions() {
-		if(functions == null) functions = new Functions();
+		if(functions == null) functions = new Functions(this);
 		return functions;
 	}
 	
