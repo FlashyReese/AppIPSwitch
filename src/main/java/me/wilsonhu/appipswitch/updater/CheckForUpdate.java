@@ -20,7 +20,7 @@ public class CheckForUpdate implements Runnable{
 	public void run() {
 		 String line;
 	    	try {
-	            URL url = new URL("https://raw.githubusercontent.com/FlashyReese/AppIPSwitch/master/updater/latestversion");
+	            URL url = new URL("https://raw.githubusercontent.com/FlashyReese/AppIPSwitch/master/version");
 	            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	            while ((line = in.readLine()) != null) {
 	            	double newestVersion = Double.parseDouble(line);

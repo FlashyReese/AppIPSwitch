@@ -83,7 +83,10 @@ public class FileDropList extends JPanel implements DropTargetListener {
         // nothing
     }
 
-    public void dragOver(DropTargetDragEvent arg0) {
+    public void dragOver(DropTargetDragEvent evt) {
+        int action = evt.getDropAction();
+        evt.rejectDrag();
+        
         // nothing
     }
 
@@ -115,7 +118,8 @@ public class FileDropList extends JPanel implements DropTargetListener {
         try {
             Transferable data = evt.getTransferable();
             if (data.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                List<File> files = (List<File>) data.getTransferData(DataFlavor.javaFileListFlavor);
+                @SuppressWarnings("unchecked")
+				List<File> files = (List<File>) data.getTransferData(DataFlavor.javaFileListFlavor);
                 for (File file : files) {
                 	if(file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("exe")) {
                 		Profile profile = new Profile(file.getName(), "", file.getAbsolutePath(), false, false);
@@ -162,7 +166,7 @@ class FileListCellRenderer extends DefaultListCellRenderer {
 
     @Override
     public Component getListCellRendererComponent(
-            JList list,
+            JList<?> list,
             Object value,
             int index,
             boolean selected,

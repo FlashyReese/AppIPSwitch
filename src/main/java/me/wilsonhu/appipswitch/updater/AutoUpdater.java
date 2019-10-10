@@ -48,15 +48,18 @@ public class AutoUpdater extends JFrame implements PropertyChangeListener {
  
         progressBar.setPreferredSize(new Dimension(200, 30));
         progressBar.setStringPainted(true);
+        progressBar.setVisible(true);
          
         constraints.gridx = 0;
         constraints.gridy = 3;
         constraints.gridwidth = 1;
         constraints.anchor = GridBagConstraints.WEST;
+        labelStatusType.setVisible(true);
         add(labelStatusType, constraints);
          
         constraints.gridy = 4;
         constraints.gridx = 0;
+        labelStatus.setVisible(true);
         add(labelStatus, constraints);
  
         constraints.gridx = 0;
@@ -188,9 +191,8 @@ public class AutoUpdater extends JFrame implements PropertyChangeListener {
 			return;
 		}
 		JOptionPane.showMessageDialog(this, labelStatus.getText(), labelStatusType.getText(), JOptionPane.INFORMATION_MESSAGE);
-		File file = new File("AppIPSwitch.jar");
 		try {
-			Desktop.getDesktop().open(file);
+			Desktop.getDesktop().open(jar);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

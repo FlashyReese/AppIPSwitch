@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
@@ -38,6 +39,7 @@ import me.wilsonhu.appipswitch.config.Settings;
 import me.wilsonhu.appipswitch.core.Functions;
 import me.wilsonhu.appipswitch.swing.ComboBoxRenderer;
 import me.wilsonhu.appipswitch.swing.FileDropList;
+import me.wilsonhu.appipswitch.swing.MessageWithLink;
 import me.wilsonhu.appipswitch.swing.PopClickListener;
 
 public class AppIPSwitch extends JFrame{
@@ -159,8 +161,17 @@ public class AppIPSwitch extends JFrame{
 				System.exit(0);
 			}
 	    });
-		jMenuHelp.add(checkForUpdates);
 		
+		JMenuItem about = new JMenuItem();
+		about.setText("About");
+		about.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				JOptionPane.showMessageDialog(null, new MessageWithLink("AppIPSwitch 1.1\n\nDevelopers:\nYao Chung Hu(FlashyReese)\n<html><a href=\"https://github.com/FlashyReese/\">GitHub</a></html>\""));
+			}
+	    });
+		
+		jMenuHelp.add(checkForUpdates);
+		jMenuHelp.add(about);
 		jMenuBar.add(jMenuHelp);
 		
 		//TODO: Start of NID Panel
