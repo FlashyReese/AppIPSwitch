@@ -4,6 +4,8 @@
 # AppIPSwitch
 Forces an application to use a specific network. AppIPSwitch uses [ForceBindIP](https://r1ch.net/projects/forcebindip "ForceBindIP") to do the binding. This application is built on Java 8/1.8
 
+![Showcase](demo.png)
+
 ```
 Note: Google Chrome requires additional configuration to run under ForceBindIP. This is because Chrome 72 or later blocks 3rd party programs from injecting DLLs. To allow ForceBindIP to work, install this enterprise policy registry file to re-enable DLL injection, then go to chrome://flags#network-service in the address bar and disable the "Enable network service" setting.
 ```
